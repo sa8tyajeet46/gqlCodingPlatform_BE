@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Level {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Topic {
+  ARRAY
+  STRING
+  BINARY_SEARCH
+}
+
+enum Language {
+  CPP
+  JAVA
+  PYTHON
+  JAVASCRIPT
+}
+
+model User {
+  id             String     @id @default(uuid())
+  email          String     @unique
+  name           String?
+  password       String
+  role           Role       @default(USER)
+  problemCreated Problems[]
+  submissions    Submission[]
+}
+
+model Problems {
+  id        Int            @id @default(autoincrement())
+  title     String
+  statement String
+  level     Level          @default(EASY)
+  topics    ProblemTopic[]
+  submissions Submission[]
+
+  testCases TestCase[]
+
+  author    User       @relation(fields: [authorId], references: [id])
+  authorId  String
+
+  @@index([authorId])
+}
+
+model ProblemTopic {
+  problem   Problems @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  problemId Int
+  topic     Topic
+
+  @@id([problemId, topic])
+}
+
+model TestCase {
+  id       Int     @id @default(autoincrement())
+  input    String // JSON / raw input
+  output   String // expected output
+  isSample Boolean @default(false) // visible to user?
+  order    Int? // optional execution order
+
+  problem   Problems @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  problemId Int
+
+  @@index([problemId])
+}
+
+enum Verdict {
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+  PENDING
+}
+
+model Submission {
+  id             Int       @id @default(autoincrement())
+
+  code           String
+  language       Language
+  verdict        Verdict   @default(WRONG_ANSWER)
+
+  executionTime  Int?      // in ms
+  memoryUsed     Int?      // in KB
+
+  createdAt      DateTime  @default(now())
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+
+  problem        Problems  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  problemId      Int
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([verdict])
+}
+
+

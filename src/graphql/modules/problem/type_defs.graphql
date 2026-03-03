@@ -1,0 +1,116 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: String!
+}
+type Problem {
+ id: ID!
+ title: String!
+ statement: String!
+
+ author: User
+ authorId: String
+}
+
+scalar DateTime
+
+enum Verdict {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
+type Submission {
+  id: Int!
+
+  code: String!
+  language: Language!
+  verdict: Verdict!
+
+  executionTime: Int
+  memoryUsed: Int
+
+  createdAt: DateTime!
+
+}
+
+
+type ProblemTopic {
+  problemId: String!
+  topic:  Topic!
+}
+
+enum Topic {
+  ARRAY
+  STRING
+  BINARY_SEARCH
+}
+
+enum Language {
+CPP
+  JAVA
+  PYTHON
+  JAVASCRIPT
+
+}
+
+type TestCase {
+  id: ID!
+  input: String!
+  output: String!
+  isSample: Boolean!
+  order: Int
+}
+
+input TestCaseInput {
+  input: String!
+  output: String!
+  isSample: Boolean = false
+  order: Int
+}
+
+
+
+type Mutation {
+createProblem(
+   title: String!
+   statement: String!
+  ): Problem!
+
+addTopicsToProblem(
+    problemId: ID!
+    topics: [Topic!]!
+  ): Problem!
+
+  addTestCasesToProblem(
+    problemId: ID!
+    testCases: [TestCaseInput!]!
+  ): [TestCase!]!
+
+  submitProblem(
+  problemId: ID!
+  code: String!
+  language: Language!) : Submission!
+  
+}
+
+
+type Query {
+   getProblems: [Problem!]!
+   getTopicsToProblem(
+    problemId: ID!
+  ): [ProblemTopic!]!
+
+  getTestCasesToProblem(
+    problemId: ID!
+  ): [TestCase!]!
+
+  getSumissions(
+   problemId: ID! 
+   ): [Submission!]
+}
