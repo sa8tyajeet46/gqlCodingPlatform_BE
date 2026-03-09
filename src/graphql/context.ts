@@ -1,7 +1,7 @@
 // graphql/context.ts
 import config from "../config/config.js";
 import { prisma } from "../config/prisma.js";
-import type { PrismaClient } from '@prisma/client'; // Import the type
+import type { PrismaClient } from '../generated/prisma/index.js';
 import type { ExpressContextFunctionArgument } from '@as-integrations/express5';
 import jwt from "jsonwebtoken";
 import { z } from "zod";

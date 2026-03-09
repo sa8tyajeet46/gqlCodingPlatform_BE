@@ -33,7 +33,7 @@ new Worker(
 
     if (!submission) return;
 
-    const batchSubmissions = submission.problem.testCases.map((tc) => ({
+    const batchSubmissions = submission.problem.testCases.map((tc: typeof submission.problem.testCases[number]) => ({
       source_code: submission.code,
       language_id: LANGUAGE_MAP[submission.language],
       stdin: tc.input,

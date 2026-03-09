@@ -7,8 +7,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and compile TypeScript
+# Copy source and Prisma schema
 COPY . .
+
+# Generate Prisma client BEFORE compiling TypeScript (tsc needs the types)
+RUN npx prisma generate
+
+# Compile TypeScript
 RUN npm run build
 
 # --- Production Stage ---
