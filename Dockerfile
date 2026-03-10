@@ -3,6 +3,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+COPY prisma ./prisma
 # Copy package files and install ALL deps (including devDeps for tsc)
 COPY package*.json ./
 RUN npm ci
