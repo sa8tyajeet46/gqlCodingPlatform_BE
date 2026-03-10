@@ -27,7 +27,7 @@ RUN npm ci
 
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/src/generated ./src/generated
+# COPY --from=builder /app/src/generated ./src/generated
 
 CMD ["npx", "prisma", "migrate", "deploy"]
 
