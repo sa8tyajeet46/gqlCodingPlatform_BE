@@ -1,3 +1,4 @@
+export const typeDef = `#graphql
 type User {
   id: ID!
   name: String!
@@ -22,3 +23,4 @@ type Query {
 me: User!
 logout: String!
 }
+`;
