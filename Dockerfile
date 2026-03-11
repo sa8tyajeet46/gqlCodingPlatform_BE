@@ -1,58 +1,55 @@
+# --- Dependency Stage (shared base) ---
+FROM node:20-alpine AS deps
+
+WORKDIR /app
+COPY package*.json ./
+# Install ALL deps once (cached layer)
+RUN npm ci
+
 # --- Build Stage ---
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy prisma schema first
-COPY prisma ./prisma
-
-# Install dependencies
-COPY package*.json ./
-RUN npm ci
-
-# Copy full source
+# Reuse node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
-
-# Compile TypeScript
-RUN npm run build
-
-# Copy GraphQL schema files into dist
-RUN cp -r src/graphql dist/graphql
-
+# Generate Prisma client + compile in one layer
+RUN npx prisma generate && \
+    npm run build && \
+    cp -r src/graphql dist/graphql
 
 # --- Migrator Stage ---
 FROM node:20-alpine AS migrator
 
 WORKDIR /app
 
+# Only copy what migrate needs - no full npm ci
+COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
-RUN npm ci
-
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 CMD ["npx", "prisma", "migrate", "deploy"]
-
 
 # --- Production Stage ---
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Install production dependencies only
+# Prune to production deps only (don't re-run npm ci)
+COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm prune --omit=dev
 
-# Copy compiled app
+# Copy compiled app + prisma
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
-# Generate Prisma client in production image
-RUN npx prisma generate
+# Reuse already-generated prisma client from builder
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 4000
 
