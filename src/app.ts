@@ -9,7 +9,7 @@ export const createApp = async (): Promise<Express> => {
   const app = express();
 
   app.use(cors({
-    origin: "http://localhost:5173", // Vite default port
+    origin: "https://gql-coding-platform-frontend.vercel.app", 
     credentials: true
   }));
   app.use(bodyParser.json());

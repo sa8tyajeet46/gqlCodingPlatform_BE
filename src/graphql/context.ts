@@ -51,7 +51,7 @@ export const createContext = async (
     const token = jwt.sign({ id }, config.JWT_SECRET as string, { expiresIn: config.JWT_EXPIRY});
 
 
-    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" });
+    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "none" });
   }
  
   /*
